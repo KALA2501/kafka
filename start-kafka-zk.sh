@@ -1,13 +1,17 @@
 #!/bin/bash
 
+# Inicia Zookeeper
 echo "→ Iniciando Zookeeper..."
-$KAFKA_HOME/bin/zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.properties &
+/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &
 sleep 5
 
+# Inicia Kafka con listeners para productores y consumidores
 echo "→ Configurando Kafka..."
-KAFKA_CONFIG="$KAFKA_HOME/config/server.properties"
-sed -i "s|^listeners=.*|listeners=PLAINTEXT://0.0.0.0:$KAFKA_LISTENER_PORT|" $KAFKA_CONFIG
-sed -i "s|^#advertised.listeners=.*|advertised.listeners=PLAINTEXT://localhost:$KAFKA_ADVERTISED_PORT|" $KAFKA_CONFIG
+echo "listeners=PLAINTEXT://0.0.0.0:8089,CONSUMER://0.0.0.0:8088" >> /opt/kafka/config/server.properties
+echo "advertised.listeners=PLAINTEXT://localhost:8089,CONSUMER://localhost:8088" >> /opt/kafka/config/server.properties
+echo "listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONSUMER:PLAINTEXT" >> /opt/kafka/config/server.properties
+echo "inter.broker.listener.name=PLAINTEXT" >> /opt/kafka/config/server.properties
 
-echo "→ Iniciando Kafka en $KAFKA_LISTENER_PORT (anunciado como $KAFKA_ADVERTISED_PORT)..."
-$KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_CONFIG
+# Inicia Kafka
+echo "→ Iniciando Kafka en 8089 (productores) y 8088 (consumidores)..."
+/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
